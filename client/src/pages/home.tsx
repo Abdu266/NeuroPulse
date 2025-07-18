@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Brain, Moon, Phone } from "lucide-react";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/components/theme-provider";
 import { CurrentStatusCard } from "@/components/current-status-card";
@@ -13,6 +14,7 @@ import { useQuery } from "@tanstack/react-query";
 
 export default function Home() {
   const { theme, setTheme } = useTheme();
+  const [, setLocation] = useLocation();
   const [episodeModalOpen, setEpisodeModalOpen] = useState(false);
   const [isEmergencyEpisode, setIsEmergencyEpisode] = useState(false);
 
@@ -117,7 +119,7 @@ export default function Home() {
           
           <Button 
             className="bg-medical-success hover:bg-medical-success/90 text-white p-4 h-auto flex-col items-start"
-            onClick={() => alert("Medication logging feature")}
+            onClick={() => setLocation("/medication")}
           >
             <div className="text-xl mb-2">💊</div>
             <div className="font-semibold">Take Medication</div>
@@ -126,11 +128,11 @@ export default function Home() {
           
           <Button 
             className="bg-medical-gray hover:bg-medical-gray/90 text-white p-4 h-auto flex-col items-start"
-            onClick={() => alert("Medical report generation feature")}
+            onClick={() => setLocation("/medical")}
           >
             <div className="text-xl mb-2">📋</div>
-            <div className="font-semibold">Medical Report</div>
-            <div className="text-xs opacity-90">Export for doctor</div>
+            <div className="font-semibold">Medical Log</div>
+            <div className="text-xs opacity-90">Track symptoms</div>
           </Button>
         </div>
       </div>

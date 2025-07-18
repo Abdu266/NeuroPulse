@@ -4,16 +4,40 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BottomNavigation } from "@/components/bottom-navigation";
 import { ArrowLeft, Plus, Pill, Clock } from "lucide-react";
 import { useLocation } from "wouter";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { insertMedicationSchema } from "@shared/schema";
+
+const medicationFormSchema = insertMedicationSchema.extend({
+  dosage: z.string().min(1, "Dosage is required"),
+});
 
 export default function Medication() {
   const [, setLocation] = useLocation();
+  const [addMedicationOpen, setAddMedicationOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  const form = useForm<z.infer<typeof medicationFormSchema>>({
+    resolver: zodResolver(medicationFormSchema),
+    defaultValues: {
+      name: "",
+      dosage: "",
+      instructions: "",
+      sideEffects: "",
+    },
+  });
 
   const { data: medications, isLoading: medicationsLoading } = useQuery({
     queryKey: ["/api/medications"],
@@ -23,11 +47,34 @@ export default function Medication() {
     queryKey: ["/api/medication-logs"],
   });
 
+  const addMedicationMutation = useMutation({
+    mutationFn: async (data: z.infer<typeof medicationFormSchema>) => {
+      return apiRequest("/api/medications", "POST", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/medications"] });
+      setAddMedicationOpen(false);
+      form.reset();
+      toast({
+        title: "Medication added",
+        description: "Your medication has been added successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to add medication. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const logMedicationMutation = useMutation({
     mutationFn: async (medicationId: number) => {
-      return apiRequest("POST", "/api/medication-logs", {
+      return apiRequest("/api/medication-logs", "POST", {
         medicationId,
         takenAt: new Date().toISOString(),
+        effectiveness: 5, // Default effectiveness
       });
     },
     onSuccess: () => {
@@ -45,6 +92,10 @@ export default function Medication() {
       });
     },
   });
+
+  const onSubmit = (data: z.infer<typeof medicationFormSchema>) => {
+    addMedicationMutation.mutate(data);
+  };
 
   const formatTimeAgo = (date: string | Date) => {
     const now = new Date();
@@ -94,14 +145,81 @@ export default function Medication() {
             <h1 className="text-lg font-semibold">Medications</h1>
             <p className="text-sm opacity-90">Manage your treatment plan</p>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-primary-foreground hover:bg-white/20"
-            onClick={() => toast({ title: "Add Medication", description: "Feature coming soon" })}
-          >
-            <Plus className="h-5 w-5" />
-          </Button>
+          <Dialog open={addMedicationOpen} onOpenChange={setAddMedicationOpen}>
+            <DialogTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-primary-foreground hover:bg-white/20"
+              >
+                <Plus className="h-5 w-5" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Add New Medication</DialogTitle>
+              </DialogHeader>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Medication Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g., Sumatriptan" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="dosage"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Dosage</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g., 50mg" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="instructions"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Instructions (Optional)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="e.g., Take with food, maximum 2 doses per day"
+                            rows={3}
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <div className="flex justify-end space-x-3">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setAddMedicationOpen(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button type="submit" disabled={addMedicationMutation.isPending}>
+                      {addMedicationMutation.isPending ? 'Adding...' : 'Add Medication'}
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
         </div>
       </header>
 
@@ -132,7 +250,7 @@ export default function Medication() {
                 <p>No medications configured.</p>
                 <Button 
                   className="mt-2"
-                  onClick={() => toast({ title: "Add Medication", description: "Feature coming soon" })}
+                  onClick={() => setAddMedicationOpen(true)}
                 >
                   Add Your First Medication
                 </Button>
