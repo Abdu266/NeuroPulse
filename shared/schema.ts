@@ -85,15 +85,7 @@ export const triggers = pgTable("triggers", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const deviceData = pgTable("device_data", {
-  id: serial("id").primaryKey(),
-  userId: varchar("user_id").notNull().references(() => users.id),
-  heartRate: integer("heart_rate"),
-  stressLevel: varchar("stress_level"), // low, medium, high
-  sleepQuality: varchar("sleep_quality"), // poor, fair, good, excellent
-  timestamp: timestamp("timestamp").notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
-});
+
 
 export const medicalReports = pgTable("medical_reports", {
   id: serial("id").primaryKey(),
@@ -141,7 +133,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   medications: many(medications),
   medicationLogs: many(medicationLogs),
   triggers: many(triggers),
-  deviceData: many(deviceData),
+
   medicalReports: many(medicalReports),
   medicalLogs: many(medicalLogs),
   assessmentTemplates: many(assessmentTemplates),
@@ -186,12 +178,7 @@ export const triggersRelations = relations(triggers, ({ one }) => ({
   }),
 }));
 
-export const deviceDataRelations = relations(deviceData, ({ one }) => ({
-  user: one(users, {
-    fields: [deviceData.userId],
-    references: [users.id],
-  }),
-}));
+
 
 export const medicalReportsRelations = relations(medicalReports, ({ one }) => ({
   user: one(users, {
@@ -239,10 +226,7 @@ export const insertTriggerSchema = createInsertSchema(triggers).omit({
   createdAt: true,
 });
 
-export const insertDeviceDataSchema = createInsertSchema(deviceData).omit({
-  id: true,
-  createdAt: true,
-});
+
 
 export const insertMedicalReportSchema = createInsertSchema(medicalReports).omit({
   id: true,
@@ -271,8 +255,7 @@ export type InsertMedicationLog = z.infer<typeof insertMedicationLogSchema>;
 export type MedicationLog = typeof medicationLogs.$inferSelect;
 export type InsertTrigger = z.infer<typeof insertTriggerSchema>;
 export type Trigger = typeof triggers.$inferSelect;
-export type InsertDeviceData = z.infer<typeof insertDeviceDataSchema>;
-export type DeviceData = typeof deviceData.$inferSelect;
+
 export type InsertMedicalReport = z.infer<typeof insertMedicalReportSchema>;
 export type MedicalReport = typeof medicalReports.$inferSelect;
 export type InsertMedicalLog = z.infer<typeof insertMedicalLogSchema>;

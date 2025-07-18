@@ -4,7 +4,7 @@ import {
   medications,
   medicationLogs,
   triggers,
-  deviceData,
+
   medicalReports,
   medicalLogs,
   assessmentTemplates,
@@ -18,8 +18,7 @@ import {
   type InsertMedicationLog,
   type Trigger,
   type InsertTrigger,
-  type DeviceData,
-  type InsertDeviceData,
+
   type MedicalReport,
   type InsertMedicalReport,
   type MedicalLog,
@@ -56,9 +55,7 @@ export interface IStorage {
   getTriggers(userId: string): Promise<Trigger[]>;
   updateTriggerCorrelation(id: number, correlationScore: number): Promise<Trigger>;
   
-  // Device data operations
-  createDeviceData(data: InsertDeviceData): Promise<DeviceData>;
-  getLatestDeviceData(userId: string): Promise<DeviceData | undefined>;
+
   
   // Medical reports
   createMedicalReport(report: InsertMedicalReport): Promise<MedicalReport>;
@@ -221,21 +218,7 @@ export class DatabaseStorage implements IStorage {
     return updated;
   }
 
-  // Device data operations
-  async createDeviceData(data: InsertDeviceData): Promise<DeviceData> {
-    const [created] = await db.insert(deviceData).values(data).returning();
-    return created;
-  }
 
-  async getLatestDeviceData(userId: string): Promise<DeviceData | undefined> {
-    const [latest] = await db
-      .select()
-      .from(deviceData)
-      .where(eq(deviceData.userId, userId))
-      .orderBy(desc(deviceData.timestamp))
-      .limit(1);
-    return latest;
-  }
 
   // Medical reports
   async createMedicalReport(report: InsertMedicalReport): Promise<MedicalReport> {

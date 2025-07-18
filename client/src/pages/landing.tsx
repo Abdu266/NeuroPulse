@@ -23,9 +23,9 @@ export default function Landing() {
             <div className="flex items-start space-x-3">
               <div className="w-2 h-2 bg-medical-success rounded-full mt-2"></div>
               <div>
-                <h3 className="font-semibold">Real-time Monitoring</h3>
+                <h3 className="font-semibold">Episode Tracking</h3>
                 <p className="text-sm text-muted-foreground">
-                  Track your migraine patterns with wearable device integration
+                  Log and track your migraine episodes with detailed symptom analysis
                 </p>
               </div>
             </div>

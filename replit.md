@@ -16,6 +16,13 @@ Preferred communication style: Simple, everyday language.
 - Added company name to page headers and landing page
 - Maintained NeuroRelief as the product name under TechNeurology umbrella
 
+### Device Connectivity Removal (January 2025)
+- Removed all wearable device integration features per user feedback
+- Eliminated device data API endpoints and database tables
+- Updated home page status card to show migraine statistics instead of device metrics
+- Simplified landing page to focus on episode tracking rather than real-time monitoring
+- Removed device connectivity status from header navigation
+
 ## System Architecture
 
 ### Frontend Architecture

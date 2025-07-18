@@ -7,7 +7,7 @@ import {
   insertMedicationSchema,
   insertMedicationLogSchema,
   insertTriggerSchema,
-  insertDeviceDataSchema,
+
   insertMedicalLogSchema,
   insertAssessmentTemplateSchema,
 } from "@shared/schema";
@@ -190,38 +190,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Device data routes
-  app.post('/api/device-data', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const deviceData = insertDeviceDataSchema.parse({
-        ...req.body,
-        userId,
-        timestamp: new Date(req.body.timestamp || Date.now()),
-      });
-      
-      const data = await storage.createDeviceData(deviceData);
-      res.json(data);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        res.status(400).json({ message: fromZodError(error).toString() });
-      } else {
-        console.error("Error creating device data:", error);
-        res.status(500).json({ message: "Failed to create device data" });
-      }
-    }
-  });
 
-  app.get('/api/device-data/latest', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const latestData = await storage.getLatestDeviceData(userId);
-      res.json(latestData);
-    } catch (error) {
-      console.error("Error fetching latest device data:", error);
-      res.status(500).json({ message: "Failed to fetch latest device data" });
-    }
-  });
 
   // Analytics routes
   app.get('/api/analytics/weekly', isAuthenticated, async (req: any, res) => {

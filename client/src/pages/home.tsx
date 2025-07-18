@@ -18,9 +18,7 @@ export default function Home() {
   const [episodeModalOpen, setEpisodeModalOpen] = useState(false);
   const [isEmergencyEpisode, setIsEmergencyEpisode] = useState(false);
 
-  const { data: deviceData } = useQuery({
-    queryKey: ["/api/device-data/latest"],
-  });
+
 
   const handleEmergencyEpisode = () => {
     setIsEmergencyEpisode(true);
@@ -41,16 +39,7 @@ export default function Home() {
     setTheme(theme === "dark" ? "light" : "dark");
   };
 
-  const getDeviceStatus = () => {
-    if (!deviceData) return "Device Disconnected";
-    
-    const now = new Date();
-    const dataTime = new Date(deviceData.timestamp);
-    const diffMinutes = (now.getTime() - dataTime.getTime()) / (1000 * 60);
-    
-    if (diffMinutes > 5) return "Device Disconnected";
-    return "Device Connected";
-  };
+
 
   return (
     <div className="max-w-md mx-auto bg-background min-h-screen shadow-xl">
@@ -62,14 +51,7 @@ export default function Home() {
             <div>
               <div className="text-xs opacity-75">TechNeurology</div>
               <h1 className="text-lg font-semibold">NeuroRelief</h1>
-              <div className="flex items-center space-x-2 text-xs opacity-90">
-                <div className={`w-2 h-2 rounded-full ${
-                  getDeviceStatus() === "Device Connected" 
-                    ? "bg-green-400 animate-pulse" 
-                    : "bg-red-400"
-                }`} />
-                <span>{getDeviceStatus()}</span>
-              </div>
+              <p className="text-xs opacity-90">Migraine Management Platform</p>
             </div>
           </div>
           <div className="flex items-center space-x-2">
