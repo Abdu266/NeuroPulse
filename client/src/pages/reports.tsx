@@ -106,6 +106,7 @@ export default function Reports() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div className="flex-1">
+            <div className="text-xs opacity-75">TechNeurology</div>
             <h1 className="text-lg font-semibold">Medical Reports</h1>
             <p className="text-sm opacity-90">Generate reports for your doctor</p>
           </div>

@@ -60,6 +60,7 @@ export default function Home() {
           <div className="flex items-center space-x-3">
             <Brain className="h-6 w-6" />
             <div>
+              <div className="text-xs opacity-75">TechNeurology</div>
               <h1 className="text-lg font-semibold">NeuroRelief</h1>
               <div className="flex items-center space-x-2 text-xs opacity-90">
                 <div className={`w-2 h-2 rounded-full ${

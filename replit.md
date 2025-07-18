@@ -8,6 +8,14 @@ NeuroRelief is a comprehensive migraine management application designed to help 
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes
+
+### TechNeurology Branding (January 2025)
+- Added TechNeurology company branding across all pages
+- Updated HTML title to "TechNeurology - NeuroRelief | Migraine Management"
+- Added company name to page headers and landing page
+- Maintained NeuroRelief as the product name under TechNeurology umbrella
+
 ## System Architecture
 
 ### Frontend Architecture

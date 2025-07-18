@@ -53,6 +53,7 @@ export default function Tracking() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div className="flex-1">
+            <div className="text-xs opacity-75">TechNeurology</div>
             <h1 className="text-lg font-semibold">Episode Tracking</h1>
             <p className="text-sm opacity-90">Monitor your migraine patterns</p>
           </div>

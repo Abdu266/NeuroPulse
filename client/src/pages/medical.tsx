@@ -158,6 +158,7 @@ export default function Medical() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
+            <div className="text-sm font-medium text-primary mb-1">TechNeurology</div>
             <h1 className="text-3xl font-bold text-foreground">Medical Logs</h1>
             <p className="text-muted-foreground mt-1">
               Comprehensive medical tracking and assessment

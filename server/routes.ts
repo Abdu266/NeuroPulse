@@ -259,6 +259,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Generate report data
       const reportData = {
+        header: {
+          company: "TechNeurology",
+          product: "NeuroRelief",
+          reportType: reportType,
+          dateRange: {
+            startDate,
+            endDate
+          },
+          generatedAt: new Date().toISOString(),
+        },
         summary: {
           totalEpisodes: episodes.length,
           avgIntensity: episodes.reduce((sum, ep) => sum + ep.intensity, 0) / episodes.length || 0,

@@ -10,6 +10,7 @@ export default function Landing() {
           <div className="mx-auto w-16 h-16 bg-primary rounded-full flex items-center justify-center mb-4">
             <Brain className="h-8 w-8 text-primary-foreground" />
           </div>
+          <div className="text-sm font-medium text-primary mb-2">TechNeurology</div>
           <CardTitle className="text-2xl font-bold">Welcome to NeuroRelief</CardTitle>
           <CardDescription className="text-base">
             Your comprehensive migraine management companion. Track episodes, monitor patterns, 
