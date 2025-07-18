@@ -6,6 +6,8 @@ import {
   triggers,
   deviceData,
   medicalReports,
+  medicalLogs,
+  assessmentTemplates,
   type User,
   type UpsertUser,
   type MigrainePeriod,
@@ -20,6 +22,10 @@ import {
   type InsertDeviceData,
   type MedicalReport,
   type InsertMedicalReport,
+  type MedicalLog,
+  type InsertMedicalLog,
+  type AssessmentTemplate,
+  type InsertAssessmentTemplate,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, gte, lte, count, avg, sum } from "drizzle-orm";
@@ -57,6 +63,20 @@ export interface IStorage {
   // Medical reports
   createMedicalReport(report: InsertMedicalReport): Promise<MedicalReport>;
   getMedicalReports(userId: string): Promise<MedicalReport[]>;
+  
+  // Medical logs
+  createMedicalLog(log: InsertMedicalLog): Promise<MedicalLog>;
+  getMedicalLogs(userId: string, limit?: number): Promise<MedicalLog[]>;
+  getMedicalLogsByEpisode(userId: string, episodeId: number): Promise<MedicalLog[]>;
+  getMedicalLogsByType(userId: string, logType: string): Promise<MedicalLog[]>;
+  updateMedicalLog(id: number, updates: Partial<InsertMedicalLog>): Promise<MedicalLog>;
+  deleteMedicalLog(id: number): Promise<void>;
+  
+  // Assessment templates
+  createAssessmentTemplate(template: InsertAssessmentTemplate): Promise<AssessmentTemplate>;
+  getAssessmentTemplates(userId: string): Promise<AssessmentTemplate[]>;
+  updateAssessmentTemplate(id: number, updates: Partial<InsertAssessmentTemplate>): Promise<AssessmentTemplate>;
+  deleteAssessmentTemplate(id: number): Promise<void>;
   
   // Analytics
   getWeeklyStats(userId: string): Promise<{
@@ -175,7 +195,7 @@ export class DatabaseStorage implements IStorage {
           eq(medicationLogs.medicationId, medicationId)
         )
       );
-    return result[0]?.effectiveness || 0;
+    return Number(result[0]?.effectiveness || 0);
   }
 
   // Trigger operations
@@ -229,6 +249,92 @@ export class DatabaseStorage implements IStorage {
       .from(medicalReports)
       .where(eq(medicalReports.userId, userId))
       .orderBy(desc(medicalReports.generatedAt));
+  }
+
+  // Medical logs
+  async createMedicalLog(log: InsertMedicalLog): Promise<MedicalLog> {
+    const [created] = await db.insert(medicalLogs).values(log).returning();
+    return created;
+  }
+
+  async getMedicalLogs(userId: string, limit = 50): Promise<MedicalLog[]> {
+    return db
+      .select()
+      .from(medicalLogs)
+      .where(eq(medicalLogs.userId, userId))
+      .orderBy(desc(medicalLogs.timestamp))
+      .limit(limit);
+  }
+
+  async getMedicalLogsByEpisode(userId: string, episodeId: number): Promise<MedicalLog[]> {
+    return db
+      .select()
+      .from(medicalLogs)
+      .where(
+        and(
+          eq(medicalLogs.userId, userId),
+          eq(medicalLogs.episodeId, episodeId)
+        )
+      )
+      .orderBy(desc(medicalLogs.timestamp));
+  }
+
+  async getMedicalLogsByType(userId: string, logType: string): Promise<MedicalLog[]> {
+    return db
+      .select()
+      .from(medicalLogs)
+      .where(
+        and(
+          eq(medicalLogs.userId, userId),
+          eq(medicalLogs.logType, logType)
+        )
+      )
+      .orderBy(desc(medicalLogs.timestamp));
+  }
+
+  async updateMedicalLog(id: number, updates: Partial<InsertMedicalLog>): Promise<MedicalLog> {
+    const [updated] = await db
+      .update(medicalLogs)
+      .set(updates)
+      .where(eq(medicalLogs.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteMedicalLog(id: number): Promise<void> {
+    await db.delete(medicalLogs).where(eq(medicalLogs.id, id));
+  }
+
+  // Assessment templates
+  async createAssessmentTemplate(template: InsertAssessmentTemplate): Promise<AssessmentTemplate> {
+    const [created] = await db.insert(assessmentTemplates).values(template).returning();
+    return created;
+  }
+
+  async getAssessmentTemplates(userId: string): Promise<AssessmentTemplate[]> {
+    return db
+      .select()
+      .from(assessmentTemplates)
+      .where(
+        and(
+          eq(assessmentTemplates.userId, userId),
+          eq(assessmentTemplates.isActive, true)
+        )
+      )
+      .orderBy(desc(assessmentTemplates.createdAt));
+  }
+
+  async updateAssessmentTemplate(id: number, updates: Partial<InsertAssessmentTemplate>): Promise<AssessmentTemplate> {
+    const [updated] = await db
+      .update(assessmentTemplates)
+      .set(updates)
+      .where(eq(assessmentTemplates.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteAssessmentTemplate(id: number): Promise<void> {
+    await db.delete(assessmentTemplates).where(eq(assessmentTemplates.id, id));
   }
 
   // Analytics

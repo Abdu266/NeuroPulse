@@ -105,6 +105,36 @@ export const medicalReports = pgTable("medical_reports", {
   generatedAt: timestamp("generated_at").defaultNow(),
 });
 
+export const medicalLogs = pgTable("medical_logs", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  episodeId: integer("episode_id").references(() => migrainePertods.id),
+  logType: varchar("log_type").notNull(), // assessment, vitals, symptoms, medication_effect, treatment
+  severity: integer("severity"), // 1-10 scale for pain/symptom severity
+  vitalSigns: jsonb("vital_signs"), // blood pressure, heart rate, temperature
+  symptoms: text("symptoms").array(),
+  painLocation: varchar("pain_location"), // frontal, temporal, occipital, etc.
+  painQuality: varchar("pain_quality"), // throbbing, sharp, dull, etc.
+  associatedSymptoms: text("associated_symptoms").array(),
+  triggers: text("triggers").array(),
+  medicationResponse: integer("medication_response"), // 1-10 effectiveness
+  functionalImpact: integer("functional_impact"), // 1-10 disability level
+  environmentalFactors: text("environmental_factors").array(),
+  notes: text("notes"),
+  timestamp: timestamp("timestamp").notNull().defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const assessmentTemplates = pgTable("assessment_templates", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  templateName: varchar("template_name").notNull(),
+  templateType: varchar("template_type").notNull(), // pre_episode, during_episode, post_episode
+  questions: jsonb("questions").notNull(),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   migrainePertods: many(migrainePertods),
@@ -113,6 +143,8 @@ export const usersRelations = relations(users, ({ many }) => ({
   triggers: many(triggers),
   deviceData: many(deviceData),
   medicalReports: many(medicalReports),
+  medicalLogs: many(medicalLogs),
+  assessmentTemplates: many(assessmentTemplates),
 }));
 
 export const migrainePertodeRelations = relations(migrainePertods, ({ one, many }) => ({
@@ -121,6 +153,7 @@ export const migrainePertodeRelations = relations(migrainePertods, ({ one, many 
     references: [users.id],
   }),
   medicationLogs: many(medicationLogs),
+  medicalLogs: many(medicalLogs),
 }));
 
 export const medicationsRelations = relations(medications, ({ one, many }) => ({
@@ -167,6 +200,24 @@ export const medicalReportsRelations = relations(medicalReports, ({ one }) => ({
   }),
 }));
 
+export const medicalLogsRelations = relations(medicalLogs, ({ one }) => ({
+  user: one(users, {
+    fields: [medicalLogs.userId],
+    references: [users.id],
+  }),
+  episode: one(migrainePertods, {
+    fields: [medicalLogs.episodeId],
+    references: [migrainePertods.id],
+  }),
+}));
+
+export const assessmentTemplatesRelations = relations(assessmentTemplates, ({ one }) => ({
+  user: one(users, {
+    fields: [assessmentTemplates.userId],
+    references: [users.id],
+  }),
+}));
+
 // Insert schemas
 export const insertMigrainePeriodSchema = createInsertSchema(migrainePertods).omit({
   id: true,
@@ -198,6 +249,17 @@ export const insertMedicalReportSchema = createInsertSchema(medicalReports).omit
   generatedAt: true,
 });
 
+export const insertMedicalLogSchema = createInsertSchema(medicalLogs).omit({
+  id: true,
+  timestamp: true,
+  createdAt: true,
+});
+
+export const insertAssessmentTemplateSchema = createInsertSchema(assessmentTemplates).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -213,3 +275,7 @@ export type InsertDeviceData = z.infer<typeof insertDeviceDataSchema>;
 export type DeviceData = typeof deviceData.$inferSelect;
 export type InsertMedicalReport = z.infer<typeof insertMedicalReportSchema>;
 export type MedicalReport = typeof medicalReports.$inferSelect;
+export type InsertMedicalLog = z.infer<typeof insertMedicalLogSchema>;
+export type MedicalLog = typeof medicalLogs.$inferSelect;
+export type InsertAssessmentTemplate = z.infer<typeof insertAssessmentTemplateSchema>;
+export type AssessmentTemplate = typeof assessmentTemplates.$inferSelect;

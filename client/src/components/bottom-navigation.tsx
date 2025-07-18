@@ -1,4 +1,4 @@
-import { Home, TrendingUp, Pill, FileText, User } from "lucide-react";
+import { Home, TrendingUp, Pill, Stethoscope, FileText, User } from "lucide-react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -7,6 +7,7 @@ const navigation = [
   { name: "Home", href: "/", icon: Home },
   { name: "Tracking", href: "/tracking", icon: TrendingUp },
   { name: "Medication", href: "/medication", icon: Pill },
+  { name: "Medical", href: "/medical", icon: Stethoscope },
   { name: "Reports", href: "/reports", icon: FileText },
   { name: "Profile", href: "/profile", icon: User },
 ];

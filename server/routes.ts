@@ -8,6 +8,8 @@ import {
   insertMedicationLogSchema,
   insertTriggerSchema,
   insertDeviceDataSchema,
+  insertMedicalLogSchema,
+  insertAssessmentTemplateSchema,
 } from "@shared/schema";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
@@ -286,8 +288,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const report = await storage.createMedicalReport({
         userId,
         reportType,
-        startDate: new Date(startDate),
-        endDate: new Date(endDate),
+        startDate: startDate,
+        endDate: endDate,
         reportData,
       });
       
@@ -306,6 +308,133 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching reports:", error);
       res.status(500).json({ message: "Failed to fetch reports" });
+    }
+  });
+
+  // Medical logs
+  app.post("/api/medical-logs", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const validatedData = insertMedicalLogSchema.parse(req.body);
+      const log = await storage.createMedicalLog({ ...validatedData, userId });
+      res.json(log);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: fromZodError(error).toString() });
+      } else {
+        console.error("Error creating medical log:", error);
+        res.status(500).json({ message: "Failed to create medical log" });
+      }
+    }
+  });
+
+  app.get("/api/medical-logs", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
+      const logs = await storage.getMedicalLogs(userId, limit);
+      res.json(logs);
+    } catch (error) {
+      console.error("Error fetching medical logs:", error);
+      res.status(500).json({ message: "Failed to fetch medical logs" });
+    }
+  });
+
+  app.get("/api/medical-logs/episode/:episodeId", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const episodeId = parseInt(req.params.episodeId);
+      const logs = await storage.getMedicalLogsByEpisode(userId, episodeId);
+      res.json(logs);
+    } catch (error) {
+      console.error("Error fetching medical logs by episode:", error);
+      res.status(500).json({ message: "Failed to fetch medical logs" });
+    }
+  });
+
+  app.get("/api/medical-logs/type/:logType", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const logType = req.params.logType;
+      const logs = await storage.getMedicalLogsByType(userId, logType);
+      res.json(logs);
+    } catch (error) {
+      console.error("Error fetching medical logs by type:", error);
+      res.status(500).json({ message: "Failed to fetch medical logs" });
+    }
+  });
+
+  app.patch("/api/medical-logs/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updates = req.body;
+      const log = await storage.updateMedicalLog(id, updates);
+      res.json(log);
+    } catch (error) {
+      console.error("Error updating medical log:", error);
+      res.status(500).json({ message: "Failed to update medical log" });
+    }
+  });
+
+  app.delete("/api/medical-logs/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteMedicalLog(id);
+      res.json({ message: "Medical log deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting medical log:", error);
+      res.status(500).json({ message: "Failed to delete medical log" });
+    }
+  });
+
+  // Assessment templates
+  app.post("/api/assessment-templates", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const validatedData = insertAssessmentTemplateSchema.parse(req.body);
+      const template = await storage.createAssessmentTemplate({ ...validatedData, userId });
+      res.json(template);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: fromZodError(error).toString() });
+      } else {
+        console.error("Error creating assessment template:", error);
+        res.status(500).json({ message: "Failed to create assessment template" });
+      }
+    }
+  });
+
+  app.get("/api/assessment-templates", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const templates = await storage.getAssessmentTemplates(userId);
+      res.json(templates);
+    } catch (error) {
+      console.error("Error fetching assessment templates:", error);
+      res.status(500).json({ message: "Failed to fetch assessment templates" });
+    }
+  });
+
+  app.patch("/api/assessment-templates/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updates = req.body;
+      const template = await storage.updateAssessmentTemplate(id, updates);
+      res.json(template);
+    } catch (error) {
+      console.error("Error updating assessment template:", error);
+      res.status(500).json({ message: "Failed to update assessment template" });
+    }
+  });
+
+  app.delete("/api/assessment-templates/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteAssessmentTemplate(id);
+      res.json({ message: "Assessment template deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting assessment template:", error);
+      res.status(500).json({ message: "Failed to delete assessment template" });
     }
   });
 

@@ -10,6 +10,7 @@ import Landing from "@/pages/landing";
 import Home from "@/pages/home";
 import Tracking from "@/pages/tracking";
 import Medication from "@/pages/medication";
+import Medical from "@/pages/medical";
 import Reports from "@/pages/reports";
 import Profile from "@/pages/profile";
 
@@ -25,6 +26,7 @@ function Router() {
           <Route path="/" component={Home} />
           <Route path="/tracking" component={Tracking} />
           <Route path="/medication" component={Medication} />
+          <Route path="/medical" component={Medical} />
           <Route path="/reports" component={Reports} />
           <Route path="/profile" component={Profile} />
         </>
